@@ -14,8 +14,8 @@ echo 'something' | fist
 ## Options
 
 ```
-usage: fist [-h] [--browser] [--verbose] [--silent] [--dry] [--user [USER]]
-            [--token [TOKEN]]
+usage: fist [-h] [--browser] [--verbose] [--silent] [--dry] [--skip-all]
+            [--user [USER]] [--token [TOKEN]]
             [files [files ...]]
 
 positional arguments:
@@ -27,6 +27,7 @@ optional arguments:
   --verbose, -v         print informations for debugging.
   --silent, -s          ignore outputs, except gist url.
   --dry, -d             dry run.
+  --skip-all, -q        skip all optional inputs.
   --user [USER], -u [USER]
                         set github user name.
   --token [TOKEN], -t [TOKEN]
