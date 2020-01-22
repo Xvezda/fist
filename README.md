@@ -43,6 +43,6 @@ export GITHUB_TOKEN_FIST=[YOUR_ACCESS_TOKEN_HERE]  # Or, fist --token TOKEN
 
 ## How to get token
 
-Go to [settings > profile](https://github.com/settings/profile) > [Developer settings > Personal access tokens](https://github.com/settings/apps).
+Go to [settings > profile](https://github.com/settings/profile) > [Developer settings](https://github.com/settings/apps) > [Personal access tokens](https://github.com/settings/tokens).
 
 Then, click *Generate new token* and check `gist` checkbox for permission.
