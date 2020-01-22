@@ -1,6 +1,6 @@
 # Fist
 
-The fast & easy gist uploader script.
+The fast & easy gist uploader script. Derieved from [shhhh](https://github.com/xvezda/shhhh) project.
 
 ## Usage
 
@@ -46,3 +46,7 @@ export GITHUB_TOKEN_FIST=[YOUR_ACCESS_TOKEN_HERE]  # Or, fist --token TOKEN
 Go to [settings > profile](https://github.com/settings/profile) > [Developer settings](https://github.com/settings/apps) > [Personal access tokens](https://github.com/settings/tokens).
 
 Then, click *Generate new token* and check `gist` checkbox for permission.
+
+
+## See also
+* [shhhh](https://github.com/xvezda/shhhh)
