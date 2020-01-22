@@ -87,6 +87,10 @@ def main():
                         help='ignore outputs, except gist url.')
     parser.add_argument('--dry', '-d', action='store_true',
                         help='dry run.')
+    # parser.add_argument('--raw', '-r', action='store_true',
+    #                     help='print raw url instead.')
+    parser.add_argument('--skip-all', '-q', action='store_true',
+                        help='skip all optional inputs.')
     parser.add_argument('--user', '-u', nargs='?', type=str,
                         help='set github user name.')
     parser.add_argument('--token', '-t', nargs='?', type=str,
@@ -138,13 +142,19 @@ def main():
             obj['files']['README.txt'] = {}
             obj['files']['README.txt']['content'] = '# %s' % (FIST_MSG,)
 
-    description = input('description (optional): ')
+    if not args.skip_all:
+        description = input('description (optional): ')
+    else:
+        description = None
     if not description:
         obj['description'] = FIST_MSG
     else:
         obj['description'] = description
 
-    public = input('public (optional - default: Y) [Y/n]: ')
+    if not args.skip_all:
+        public = input('public (optional - default: Y) [Y/n]: ')
+    else:
+        public = None
     if public == 'Y' or not public:
         public = True
     else:
@@ -242,5 +252,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-# vim:ft=python
