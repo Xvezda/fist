@@ -100,7 +100,7 @@ def main():
     args = parser.parse_args()
 
     if not args.token:
-        token = os.environ.get('GITHUB_TOKEN_FIST')
+        token = os.getenv('GITHUB_TOKEN_FIST')
         if not token:
             print_stderr('Token not found!')
             return 1
@@ -162,7 +162,7 @@ def main():
     obj['public'] = public
 
     if not args.user:
-        username = os.environ.get('GITHUB_USERNAME')
+        username = os.getenv('GITHUB_USERNAME')
         if not username:
             username = input_until(msg='username: ',
                                    fail_msg='User name is empty.')
