@@ -18,16 +18,16 @@ usage: fist [-h] [--browser] [--verbose] [--silent] [--dry] [--user [USER]]
             [files [files ...]]
 
 positional arguments:
-  files                 Files to upload.
+  files                 files to upload.
 
 optional arguments:
   -h, --help            show this help message and exit
-  --browser, -b         Open web browser when gist uploaded.
-  --verbose, -v         Print informations for debugging.
-  --silent, -s          Ignore outputs, except gist url.
-  --dry, -d             Dry run.
+  --browser, -b         open web browser when gist uploaded.
+  --verbose, -v         print informations for debugging.
+  --silent, -s          ignore outputs, except gist url.
+  --dry, -d             dry run.
   --user [USER], -u [USER]
-                        Set github user name.
+                        set github user name.
   --token [TOKEN], -t [TOKEN]
-                        Set github access token.
+                        set github access token.
 ```

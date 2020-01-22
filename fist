@@ -80,19 +80,19 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--browser', '-b', action='store_true',
-                        help='Open web browser when gist uploaded.')
+                        help='open web browser when gist uploaded.')
     parser.add_argument('--verbose', '-v', action='store_true',
-                        help='Print informations for debugging.')
+                        help='print informations for debugging.')
     parser.add_argument('--silent', '-s', action='store_true',
-                        help='Ignore outputs, except gist url.')
+                        help='ignore outputs, except gist url.')
     parser.add_argument('--dry', '-d', action='store_true',
-                        help='Dry run.')
+                        help='dry run.')
     parser.add_argument('--user', '-u', nargs='?', type=str,
-                        help='Set github user name.')
+                        help='set github user name.')
     parser.add_argument('--token', '-t', nargs='?', type=str,
-                        help='Set github access token.')
+                        help='set github access token.')
     parser.add_argument('files', nargs='*',
-                        help='Files to upload.')
+                        help='files to upload.')
     args = parser.parse_args()
 
     if not args.token:
