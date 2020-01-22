@@ -39,3 +39,10 @@ optional arguments:
 export GITHUB_USERNAME=[YOUR_USERNAME_HERE]        # Or, fist --user USERNAME
 export GITHUB_TOKEN_FIST=[YOUR_ACCESS_TOKEN_HERE]  # Or, fist --token TOKEN
 ```
+
+
+## How to get token
+
+Go to [settings > profile](https://github.com/settings/profile) > [Developer settings > Personal access tokens](https://github.com/settings/apps).
+
+Then, click *Generate new token* and check `gist` checkbox for permission.
