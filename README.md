@@ -1,4 +1,5 @@
 # Fist
+![License](https://img.shields.io/github/license/Xvezda/fist)
 
 The fast & easy gist uploader script. Derieved from [shhhh](https://github.com/xvezda/shhhh) project.
 
