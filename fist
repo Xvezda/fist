@@ -1,0 +1,239 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# Copyright (c) 2019 Xvezda <https://xvezda.com/>
+#
+# Use of this source code is governed by an MIT-style
+# license that can be found in the LICENSE file or at
+# https://opensource.org/licenses/MIT.
+# ===============================
+# ✊ Fist; Fast gist creator script
+
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+
+import os
+import sys
+import json
+import base64
+import string
+import argparse
+import subprocess
+
+
+REPO_URL = 'https://github.com/Xvezda/fist'
+FIST_MSG = 'Created by fist; The fast gist uploader - %s' % (REPO_URL,)
+GIST_HOST = 'gist.github.com'
+GIST_API_URL = 'https://api.github.com/gists'
+
+# Overwrite unsafe input
+if sys.version_info.major < 3:
+    input = raw_input
+
+
+def print_with_flush(msg, end='\n'):
+    sys.stdout.write(msg + end)
+    sys.stdout.flush()
+
+
+def print_stderr(msg, end='\n'):
+    sys.stderr.write(msg + end)
+
+
+def input_until(expr='val', msg='', fail_msg=''):
+    try:
+        while True:
+            val = input(msg)
+            if not eval(expr):
+                print_stderr(fail_msg)
+                continue
+            else:
+                return val
+    except Exception:
+        pass
+    finally:
+        del val
+
+
+def escape_dquote(text):
+    return text.replace('"', '\\"')
+
+
+def call_with_cwd(cmd, cwd='', silent=False, **kwargs):
+    with open(os.devnull, 'w') as fnull:
+        outfd = fnull if silent else None
+        if not cwd:
+            subprocess.call(cmd,
+                            stdout=outfd, stderr=outfd,
+                            shell=True, **kwargs)
+        else:
+            subprocess.call('(cd %s && %s)' % (cwd, cmd),
+                            stdout=outfd, stderr=outfd,
+                            shell=True, **kwargs)
+
+
+def main():
+    if sys.version_info[:2] < (2, 4):
+        print_stderr('Python version is too low.')
+        return 1
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--browser', '-b', action='store_true')
+    parser.add_argument('--verbose', '-v', action='store_true')
+    parser.add_argument('--silent', '-s', action='store_true')
+    parser.add_argument('--dry', '-d', action='store_true')
+    parser.add_argument('--user', '-u', nargs='?', type=str)
+    parser.add_argument('--token', '-t', nargs='?', type=str)
+    parser.add_argument('files', nargs='*')
+    args = parser.parse_args()
+
+    if not args.token:
+        token = os.environ.get('GITHUB_TOKEN_FIST')
+        if not token:
+            print_stderr('Token not found!')
+            return 1
+    else:
+        token = args.token
+
+    obj = {
+        'files': {},
+    }
+    binaries = []
+
+    if not args.files:
+        text = sys.stdin.read()
+        sys.stdin.close()
+        sys.stdin = os.fdopen(1)
+
+        filename = input_until(msg='filename: ',
+                               fail_msg='You must provide filename '
+                                        'when pipe into fist.')
+        # Verify
+        filename = os.path.basename(filename)
+
+        obj['files'][filename] = {}
+        obj['files'][filename]['content'] = text
+    else:
+        for file_ in args.files:
+            with open(file_, 'rb') as f:
+                filename = os.path.basename(file_)
+                content = f.read()
+                if any(c not in string.printable for c in content):
+                    # print_stderr('File "%s" is binary' % (filename,))
+                    # return 1
+                    binaries.append(file_)
+                    continue
+                else:
+                    obj['files'][filename] = {}
+                    obj['files'][filename]['content'] = content
+        if not obj['files']:
+            obj['files']['README.txt'] = {}
+            obj['files']['README.txt']['content'] = '# %s' % (FIST_MSG,)
+
+    description = input('description (optional): ')
+    if not description:
+        obj['description'] = FIST_MSG
+    else:
+        obj['description'] = description
+
+    public = input('public (optional - default: Y) [Y/n]: ')
+    if public == 'Y' or not public:
+        public = True
+    else:
+        public = False
+    obj['public'] = public
+
+    if not args.user:
+        username = os.environ.get('GITHUB_USERNAME')
+        if not username:
+            username = input_until(msg='username: ',
+                                   fail_msg='User name is empty.')
+    else:
+        username = args.user
+
+    credential = ':'.join([username, token])
+    authkey = base64.b64encode(credential)
+
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Basic %s' % (authkey,),
+    }
+
+    if args.dry:
+        print()
+        print('POST /gists HTTP/1.1')
+        print('Host: api.github.com')
+        for key in headers:
+            print(':'.join([key, headers[key]]))
+        if args.verbose:
+            print('[Verbose] Authorization: Basic %s (base64)' % (credential,))
+        print()
+        print(json.dumps(obj, ensure_ascii=False))
+        return 0
+
+    try:
+        import requests
+        def send(content):
+            response = requests.post(GIST_API_URL, headers=headers, data=content)
+            if args.verbose:
+                print('[Verbose] requested by requests module')
+            return response.text
+    except ImportError:
+        def send(content):
+            command = ['curl', '-s', '-X', 'POST']
+            for key in headers:
+                command.append('-H')
+                command.append('"%s"' % (
+                    escape_dquote(': '.join([key, headers[key]]),)))
+            command.append('-d')
+            import shlex
+            command.append('"%s"' % (escape_dquote(content),))
+            command.append(GIST_API_URL)
+            if args.verbose:
+                print('[Verbose] requested by command line curl')
+            return subprocess.check_output(shlex.split(' '.join(command)))
+
+    r = send(json.dumps(obj, ensure_ascii=False))
+    if args.verbose:
+        print(r)
+    result = json.loads(r)
+
+    if binaries:
+        import tempfile
+        temppath = tempfile.mkdtemp()
+        try:
+            if args.verbose:
+                print('[Verbose] tempdir created: %s' % (temppath,))
+            id_ = result.get('id')
+            gist_repo_url = 'https://%s@%s/%s.git' % (credential, GIST_HOST, id_)
+            call_with_cwd('git clone %s' % (gist_repo_url,),
+                          silent=args.silent, cwd=temppath)
+            for binary in binaries:
+                cppath = os.path.join(temppath, id_, os.path.basename(binary))
+                call_with_cwd('cp %s %s' % (binary, cppath), silent=args.silent)
+            call_with_cwd('git add .',
+                          cwd=os.path.join(temppath, id_), silent=args.silent)
+            call_with_cwd('git commit -m "Add binaries"',
+                          cwd=os.path.join(temppath, id_), silent=args.silent)
+            call_with_cwd('git push origin master',
+                          cwd=os.path.join(temppath, id_), silent=args.silent)
+        except Exception as e:
+            print_stderr(str(e))
+            return 1
+        finally:
+            import shutil
+            shutil.rmtree(temppath)
+
+    result_url = result.get('html_url')
+    print(result_url)
+
+    if args.browser:
+        import webbrowser
+        webbrowser.open(result_url)
+
+
+if __name__ == '__main__':
+    main()
+
+# vim:ft=python
